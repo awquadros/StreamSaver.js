@@ -60,15 +60,18 @@ const writeStream = streamSaver.createWriteStream('filename.txt', size)
 
 // WriteStream is a whatwg standard writable stream
 // https://streams.spec.whatwg.org/
-// 
+//
 // and the write fn only accepts uint8array
 writeStream.write(uint8array)
 
 // it's also possible to pipe another stream to the writeStream
-readableStream.pipeTo(writeStream)
+readableStream.pipeTo(writeStream, { preventClose, preventAbort } = {}))
 
 // when you are done: you close it
 writeStream.close()
+
+// if you want to abort the download
+writeStream.abort()
 ```
 That is pretty much all StreamSaver.js dose :)
 

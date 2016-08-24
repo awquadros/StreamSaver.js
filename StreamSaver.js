@@ -13,20 +13,18 @@
 		createBlobReader,
 		supported: false,
 		version: {
-			full: '0.2.0',
-			major: 0, minor: 2, dot: 0
+			full: '1.0.0',
+			major: 1, minor: 0, dot: 0
 		}
 	},
-	proxy = 'https://jimmywarting.github.io/StreamSaver.js/mitm.html?version=' +
+	// proxy = 'https://jimmywarting.github.io/StreamSaver.js/mitm.html?version=' +
+	proxy = 'http://localhost:3001/mitm.html?version=' +
 	         streamSaver.version.full
 
 	try {
 		// Some browser has it but ain't allowed to construct a stream yet
 		streamSaver.supported = !!new ReadableStream()
-	} catch(err) {
-		// if you are running chrome < 52 then you can enable it
-		// `chrome://flags/#enable-experimental-web-platform-features`
-	}
+	} catch(err){}
 
 	function createWriteStream(filename, queuingStrategy, size) {
 
@@ -37,17 +35,17 @@
 		let channel = new MessageChannel,
 		popup,
 		setupChannel = () => new Promise((resolve, reject) => {
-			channel.port1.onmessage = evt => {
-				evt.data.debug &&
-				evt.data.debug === 'Mocking a download request' &&
+			channel.port1.onmessage = ({data}) => {
+				data.debug &&
+				data.debug === 'Mocking a download request' &&
 				resolve()
 
-				if(evt.data.download) {
+				if(data.download) {
 					if(!secure) popup.close() // don't need the popup any longer
 					let link = document.createElement('a')
 					let click = new MouseEvent('click')
 
-					link.href = evt.data.download
+					link.href = data.download
 					link.dispatchEvent(click)
 				}
 			}
@@ -65,7 +63,8 @@
 					loaded = true
 					iframe.removeEventListener('load', fn)
 					iframe.contentWindow.postMessage(
-						{filename, size}, '*', [channel.port2])
+						{filename, size}, '*', [channel.port2]
+					)
 				})
 			}
 
@@ -118,8 +117,8 @@
 				channel.port1.postMessage('end')
 				console.log('All data successfully read!')
 			},
-			abort(e) {
-				console.error('Something went wrong!', e)
+			abort() {
+				channel.port1.postMessage('abort')
 			}
 		}, queuingStrategy)
 	}
@@ -164,4 +163,4 @@
 
 	return streamSaver
 
-});
+})

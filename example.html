@@ -39,7 +39,8 @@
 		<button id="$c">Write some ccc's</button>
 		<button id="$ipsum">Write a lot of Lorem ipsum</button>
 	</div>
-	<button id="$close" hidden>close stream</button>
+	<button id="$close" hidden title="When you are done writing">Close</button>
+	<button id="$abort" hidden title="When you want to abort">Abort</button>
 	<script src="StreamSaver.js"></script>
 	<script src="https://cdn.jsdelivr.net/webtorrent/latest/webtorrent.min.js"></script>
 	<script src="https://rawgit.com/jimmywarting/browser-su/master/build/permissions.js"></script>
@@ -74,8 +75,9 @@
 			myFile = streamSaver.createWriteStream(filename)
 
 			$form.remove()
-			$close.hidden = false
+			$abort.hidden = $close.hidden = false
 			$close.onclick = event => myFile.close()
+			$abort.onclick = event => myFile.abort().catch(err=>{})
 
 			switch (kind) {
 				case "text":
